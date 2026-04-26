@@ -4,7 +4,7 @@ timestamp () {
   date +"%Y-%m-%d %H:%M:%S,%3N"
 }
 
-echo "---Checking if SteamCMD exist---"
+echo "$(timestamp) ---Checking if SteamCMD exist---"
 if [ ! -f ${STEAMCMD_DIR}/steamcmd.sh ]; then
   echo "SteamCMD not found!"
   wget -q -O ${STEAMCMD_DIR}/steamcmd_linux.tar.gz http://media.steampowered.com/client/steamcmd_linux.tar.gz
@@ -14,7 +14,7 @@ else
   echo "SteamCMD found!"
 fi
 
-echo "---Update SteamCMD---"
+echo "$(timestamp) ---Update SteamCMD---"
 if [ "${STEAM_USERNAME}" == "" ]; then
   ${STEAMCMD_DIR}/steamcmd.sh \
   +login anonymous \
@@ -25,9 +25,9 @@ else
   +quit
 fi
 
-echo "---Checking if Proton is installed---"
+echo "$(timestamp) ---Checking if Proton is installed---"
 if ! [ -f "${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton" ]; then
-  echo "---Proton not found, installing---"
+  echo "$(timestamp) ---Proton not found, installing---"
   mkdir -p "${ASTEAM_PATH}/compatibilitytools.d"
   mkdir -p "${ASTEAM_PATH}/steamapps/compatdata/${GAME_ID}"
   mkdir -p "${DATA_DIR}/.steam"
@@ -40,17 +40,16 @@ if ! [ -f "${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/pro
   fi
   tar -x -C "${ASTEAM_PATH}/compatibilitytools.d/" -f "${DATA_DIR}/GE-Proton${GE_PROTON_VERSION}.tgz" && \
   if ! [ -f "${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton" ]; then
-    echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
-    sleep infinity
+    echo "$(timestamp) ---Something went wrong, can't find the Proton executable!---"
   fi
 else
-  echo "---Proton already installed---"
+  echo "$(timestamp) ---Proton already installed---"
 fi
 
-echo "---Update Server---"
+echo "$(timestamp) ---Update Server---"
 if [ "${STEAM_USERNAME}" == "" ]; then
     if [ "${VALIDATE}" == "true" ]; then
-    	echo "---Validating installation---"
+    	echo "$(timestamp) ---Validating installation---"
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
@@ -67,7 +66,7 @@ if [ "${STEAM_USERNAME}" == "" ]; then
     fi
 else
     if [ "${VALIDATE}" == "true" ]; then
-    	echo "---Validating installation---"
+    	echo "$(timestamp) ---Validating installation---"
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
@@ -85,7 +84,7 @@ else
 fi
 
 
-echo "---Prepare Config---"
+echo "$(timestamp) ---Prepare Config---"
 config_file="${SERVER_DIR}/DedicatedServerConfig.json"
 sample_file="${SERVER_DIR}/DedicatedServerConfig_Sample.json"
 safer_defaults='{"HostWebAPIDisabledCommands":[],"HostWebAPIOptions":[],"Admins":[],"PoliceRolePlayers":[]}'
@@ -96,20 +95,20 @@ else
   echo "GAME_CONFIG_JSON not set, using safer defaults with sample config"
   jq -s '.[0] * .[1]' "${sample_file}" <(echo "${safer_defaults}") > "${config_file}"
 fi
-echo "---Config ready ---"
+echo "$(timestamp) ---Config ready ---"
 
 
-echo "---Prepare Server---"
+echo "$(timestamp) ---Prepare Server---"
 chmod -R ${DATA_PERM} ${DATA_DIR}
 cd ${SERVER_DIR}
 find . -type f -name "*.dll" -exec cp {} "${SERVER_DIR}/MotorTown/Binaries/Win64/" \;
-echo "---Server ready---"
+echo "$(timestamp) ---Server ready---"
 
 
 if [ ! -f ${SERVER_DIR}/MotorTown/Binaries/Win64/MotorTownServer-Win64-Shipping.exe ]; then
-  echo "---Something went wrong, can't find the server executable!---"
+  echo "$(timestamp) ---Something went wrong, can't find the server executable!---"
 else
-  echo "---Start Server---"
+  echo "$(timestamp) ---Start Server---"
   cd ${SERVER_DIR}
   ${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton run ${SERVER_DIR}/MotorTown/Binaries/Win64/MotorTownServer-Win64-Shipping.exe ${GAME_PARAMS}
 
