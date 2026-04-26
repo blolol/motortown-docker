@@ -1,84 +1,79 @@
-###########################################################
-# Dockerfile that builds a MotorTown Dedicated Server
-###########################################################
+FROM debian:12-slim
 
-# BUILD STAGE
+ENV HOME="/serverdata"
+ENV GE_PROTON_VERSION="8-30"
+ENV GE_PROTON_URL="https://github.com/GloriousEggroll/proton-ge-custom/releases/download/GE-Proton${GE_PROTON_VERSION}/GE-Proton${GE_PROTON_VERSION}.tar.gz"
 
-FROM cm2network/steamcmd:root-bookworm AS build_stage
+ENV DATA_DIR="/serverdata"
+ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd"
+ENV SERVER_DIR="${DATA_DIR}/serverfiles"
 
-LABEL maintainer="joedwards32@gmail.com"
-LABEL maintainer="mmenistr@gmail.com"
-LABEL maintainer="ross@rosspaffett.com"
+ARG GAME_ID
+ENV GAME_ID=${GAME_ID}
+ARG GAME_ID_ARGS
+ENV GAME_ID_ARGS=${GAME_ID_ARGS}
 
-ENV STEAM_USER=""
-ENV STEAM_PASSWORD=""
-ENV GUARD_CODE=""
-ENV STEAMAPPID=2223650
-ENV STEAMAPP="motortown"
-ENV STEAMAPPDIR="${HOMEDIR}/${STEAMAPP}-dedicated"
-ENV STEAMAPPVALIDATE=0
-ENV STEAM_BRANCH=""
+ENV ASTEAM_PATH="${DATA_DIR}/Steam"
+ENV STEAM_COMPAT_CLIENT_INSTALL_PATH="${ASTEAM_PATH}"
+ENV STEAM_COMPAT_DATA_PATH="${ASTEAM_PATH}/steamapps/compatdata/${GAME_ID}"
 
-COPY etc/entry.sh "${HOMEDIR}/entry.sh"
-COPY etc/DedicatedServerConfig_Sample.json "/etc/DedicatedServerConfig_Sample.json"
-COPY etc/pre.sh "/etc/pre.sh"
-COPY etc/post.sh "/etc/post.sh"
+ENV ULWGL_ID=0
+ENV BACKUP="false"
+ENV BACKUP_INTERVAL=120
+ENV BACKUPS_TO_KEEP=12
+ENV VALIDATE=""
+ARG GAME_PARAMS
+ENV GAME_PARAMS=${GAME_PARAMS}
+ENV UMASK=000
+ENV UID=99
+ENV GID=100
+ENV USERNAME=""
+ENV PASSWRD=""
+ENV USER="steam"
+ENV DATA_PERM=770
 
-RUN set -x \
-	# Install, update & upgrade packages
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends --no-install-suggests \
-		wget \
-		ca-certificates \
-		lib32z1 \
-                simpleproxy \
-                libicu-dev \
-                unzip \
-		jq \
-	&& mkdir -p "${STEAMAPPDIR}" \
-	# Add entry script
-	&& chmod +x "${HOMEDIR}/entry.sh" \
-	&& chown -R "${USER}:${USER}" "${HOMEDIR}/entry.sh" "${STEAMAPPDIR}" \
-	# Clean up
-        && apt-get clean \
-        && find /var/lib/apt/lists/ -type f -delete
+RUN useradd -d $DATA_DIR -s /bin/bash -g $GID -u $UID $USER && \
+    sed -i 's#^Components: .*#Components: main non-free contrib#g' /etc/apt/sources.list.d/debian.sources \
+    && echo steam steam/question select "I AGREE" | debconf-set-selections \
+    && echo steam steam/license note '' | debconf-set-selections \
+    && dpkg --add-architecture i386 \
+    && apt-get update \
+    && apt-get install --no-install-recommends -y \
+        procps \
+        ca-certificates \
+        winbind \
+        dbus \
+        libfreetype6 \
+        curl \
+        wget \
+        jq \
+        locales \
+        lib32gcc-s1 \
+        screen \
+        binutils \
+        cabextract \
+        xvfb \
+        winbind \
+    && echo 'LANG="en_US.UTF-8"' > /etc/default/locale \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
+    && locale-gen \
+    && rm -f /etc/machine-id \
+    && dbus-uuidgen --ensure=/etc/machine-id \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean \
+    && apt-get autoremove -y
 
-# BASE
+RUN  echo "* hard nice -20" | tee -a /etc/security/limits.conf
 
-FROM build_stage AS bookworm-base
+RUN mkdir $DATA_DIR && \
+    chown -R $USER $DATA_DIR
 
-ENV SERVER_HOSTNAME="motortown private server" \
-    SERVER_MESSAGE="Welcome!\nHave fun!" \
-    SERVER_PASSWORD="" \
-    MAX_PLAYERS=10 \
-    MAX_PLAYER_VEHICLES=5 \
-    ALLOW_COMPANY_VEHCILES=false \
-    ALLOW_COMPANY_AI=true \
-    MAX_HOUSING_RENTAL_PLOTS=1 \
-    MAX_HOUSING_RENTAL_DAYS=7 \
-    HOUSING_RENTAL_PRICE_RATIO=0.1 \
-    ALLOW_MODDED_VEHICLES=false \
-    NPC_VEHICLE_DENSITY=1.0 \
-    NPC_POLICE_DENSITY=1.0 \
-    ENABLE_WEB_API=false \
-    WEB_API_PASSWORD="p4ssw0rd" \
-    WEB_API_PORT=8080
+ADD /scripts/ /opt/scripts/
+RUN chmod -R $DATA_PERM /opt/scripts/
 
-# Set permissions on STEAMAPPDIR
-#   Permissions may need to be reset if persistent volume mounted
-RUN set -x \
-        && chown -R "${USER}:${USER}" "${STEAMAPPDIR}" \
-        && chmod 0777 "${STEAMAPPDIR}"
+RUN mkdir $STEAMCMD_DIR && \
+    mkdir $SERVER_DIR && \
+    wget "$GE_PROTON_URL" -O "${DATA_DIR}/GE-Proton${GE_PROTON_VERSION}.tgz"
 
-# Switch to user
-USER ${USER}
-
-WORKDIR ${HOMEDIR}
-
-CMD ["bash", "entry.sh"]
-
-# Expose ports
-EXPOSE 7777/tcp \
-        7777/udp \
-        27015/tcp \
-	27015/udp
+#Server Start
+ENTRYPOINT ["/opt/scripts/start.sh"]
