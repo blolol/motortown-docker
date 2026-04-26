@@ -107,14 +107,11 @@ echo "---Server ready---"
 
 
 if [ ! -f ${SERVER_DIR}/MotorTown/Binaries/Win64/MotorTownServer-Win64-Shipping.exe ]; then
-  echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
-  sleep infinity
+  echo "---Something went wrong, can't find the server executable!---"
 else
   echo "---Start Server---"
   cd ${SERVER_DIR}
   ${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton run ${SERVER_DIR}/MotorTown/Binaries/Win64/MotorTownServer-Win64-Shipping.exe ${GAME_PARAMS}
-
-  sleep infinity
 
   echo "$(timestamp) ERROR: He's dead, Jim"
   exit 1
