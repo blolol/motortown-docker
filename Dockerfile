@@ -8,12 +8,12 @@ ENV DATA_DIR="/serverdata"
 ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd"
 ENV SERVER_DIR="${DATA_DIR}/serverfiles"
 
-ENV GAME_ID="2223650"
-ENV GAME_ID_ARGS="-beta beta -betapassword motortowndedi"
+ENV STEAM_APP_ID="2223650"
+ENV STEAM_APP_ARGS="-beta beta -betapassword motortowndedi"
 
 ENV ASTEAM_PATH="${DATA_DIR}/Steam"
 ENV STEAM_COMPAT_CLIENT_INSTALL_PATH="${ASTEAM_PATH}"
-ENV STEAM_COMPAT_DATA_PATH="${ASTEAM_PATH}/steamapps/compatdata/${GAME_ID}"
+ENV STEAM_COMPAT_DATA_PATH="${ASTEAM_PATH}/steamapps/compatdata/${STEAM_APP_ID}"
 
 ENV ULWGL_ID=0
 ENV BACKUP="false"

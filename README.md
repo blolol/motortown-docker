@@ -50,6 +50,8 @@ Like other [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)-based g
 docker run -e VALIDATE=true ghcr.io/blolol/motortown
 ```
 
+You can override the default Steam app ID of `2223650` by setting `$STEAM_APP_ID`. To change the game branch, set `$STEAM_APP_ARGS`, which by default is set to `-beta beta -betapassword motortowndedi`.
+
 ## Credits
 
 This repo combines the work of [sazquatch17/motortowndedi](https://github.com/sazquatch17/motortowndedi) and [dominicrico/motortown](https://github.com/dominicrico/motortown). Thanks!

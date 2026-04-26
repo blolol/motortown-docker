@@ -29,7 +29,7 @@ echo "$(timestamp) ---Checking if Proton is installed---"
 if ! [ -f "${ASTEAM_PATH}/compatibilitytools.d/GE-Proton${GE_PROTON_VERSION}/proton" ]; then
   echo "$(timestamp) ---Proton not found, installing---"
   mkdir -p "${ASTEAM_PATH}/compatibilitytools.d"
-  mkdir -p "${ASTEAM_PATH}/steamapps/compatdata/${GAME_ID}"
+  mkdir -p "${ASTEAM_PATH}/steamapps/compatdata/${STEAM_APP_ID}"
   mkdir -p "${DATA_DIR}/.steam"
   ln -s "${STEAMCMD_DIR}/linux32" "${DATA_DIR}/.steam/sdk32"
   ln -s "${STEAMCMD_DIR}/linux64" "${DATA_DIR}/.steam/sdk64"
@@ -54,14 +54,14 @@ if [ "${STEAM_USERNAME}" == "" ]; then
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
         +login anonymous \
-        +app_update ${GAME_ID} ${GAME_ID_ARGS} validate \
+        +app_update ${STEAM_APP_ID} ${STEAM_APP_ARGS} validate \
         +quit
     else
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
         +login anonymous \
-        +app_update ${GAME_ID} ${GAME_ID_ARGS} \
+        +app_update ${STEAM_APP_ID} ${STEAM_APP_ARGS} \
         +quit
     fi
 else
@@ -71,14 +71,14 @@ else
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
         +login ${STEAM_USERNAME} ${STEAM_PASSWORD} \
-        +app_update ${GAME_ID} ${GAME_ID_ARGS} validate \
+        +app_update ${STEAM_APP_ID} ${STEAM_APP_ARGS} validate \
         +quit
     else
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
         +login ${STEAM_USERNAME} ${STEAM_PASSWORD} \
-        +app_update ${GAME_ID} ${GAME_ID_ARGS} \
+        +app_update ${STEAM_APP_ID} ${STEAM_APP_ARGS} \
         +quit
     fi
 fi
