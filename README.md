@@ -40,6 +40,8 @@ docker run -e GAME_CONFIG_JSON='{"ServerName":"Foo Bar","Password":"s3cr3t"}' gh
 
 Before the game server starts, [scripts/start-server.sh](scripts/start-server.sh) merges some sane defaults into the sample config (for example, setting `"Admins":[]`) before merging in the contents of `$GAME_CONFIG_JSON` and writing the resulting file to `$SERVER_DIR/DedicatedServerConfig.json`.
 
+By default, the server executable is started with the arguments from the batch script that ships with the Windows dedicated server: `Jeju_World?listen? -server -log -useperfthreads`. You can override this by setting `$GAME_PARAMS`.
+
 ### Game updates
 
 Like other [SteamCMD](https://developer.valvesoftware.com/wiki/SteamCMD)-based game server images, this one attempts to update to the latest version of the game on each container startup. So if the game updates, simply restart the container to upgrade it. You can optionally set `$VALIDATE` to `true` to validate the server files:
