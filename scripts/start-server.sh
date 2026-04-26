@@ -15,13 +15,13 @@ else
 fi
 
 echo "---Update SteamCMD---"
-if [ "${USERNAME}" == "" ]; then
+if [ "${STEAM_USERNAME}" == "" ]; then
   ${STEAMCMD_DIR}/steamcmd.sh \
   +login anonymous \
   +quit
 else
   ${STEAMCMD_DIR}/steamcmd.sh \
-  +login ${USERNAME} ${PASSWRD} \
+  +login ${STEAM_USERNAME} ${STEAM_PASSWORD} \
   +quit
 fi
 
@@ -48,7 +48,7 @@ else
 fi
 
 echo "---Update Server---"
-if [ "${USERNAME}" == "" ]; then
+if [ "${STEAM_USERNAME}" == "" ]; then
     if [ "${VALIDATE}" == "true" ]; then
     	echo "---Validating installation---"
         ${STEAMCMD_DIR}/steamcmd.sh \
@@ -71,18 +71,32 @@ else
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
-        +login ${USERNAME} ${PASSWRD} \
+        +login ${STEAM_USERNAME} ${STEAM_PASSWORD} \
         +app_update ${GAME_ID} ${GAME_ID_ARGS} validate \
         +quit
     else
         ${STEAMCMD_DIR}/steamcmd.sh \
         +@sSteamCmdForcePlatformType windows \
         +force_install_dir ${SERVER_DIR} \
-        +login ${USERNAME} ${PASSWRD} \
+        +login ${STEAM_USERNAME} ${STEAM_PASSWORD} \
         +app_update ${GAME_ID} ${GAME_ID_ARGS} \
         +quit
     fi
 fi
+
+
+echo "---Prepare Config---"
+config_file="${SERVER_DIR}/DedicatedServerConfig.json"
+sample_file="${SERVER_DIR}/DedicatedServerConfig_Sample.json"
+safer_defaults='{"HostWebAPIDisabledCommands":[],"HostWebAPIOptions":[],"Admins":[],"PoliceRolePlayers":[]}'
+if [ -n "${GAME_CONFIG_JSON}" ]; then
+  echo "Merging GAME_CONFIG_JSON into ${config_file}"
+  jq -s '.[0] * .[1] * .[2]' "${sample_file}" <(echo "${safer_defaults}") <(echo "${GAME_CONFIG_JSON}") > "${config_file}"
+else
+  echo "GAME_CONFIG_JSON not set, using safer defaults with sample config"
+  jq -s '.[0] * .[1]' "${sample_file}" <(echo "${safer_defaults}") > "${config_file}"
+fi
+echo "---Config ready ---"
 
 
 echo "---Prepare Server---"
