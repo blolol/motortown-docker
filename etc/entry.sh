@@ -111,16 +111,13 @@ sed -i -e "s/{{SERVER_HOSTNAME}}/${SERVER_HOSTNAME}/g" \
        -e "s/{{WEB_API_PORT}}/${WEB_API_PORT}/g" \
        "${STEAMAPPDIR}"/game/motortown/cfg/DedicatedServerConfig_Sample.json
 
-# Switch to server directory
-cd "${STEAMAPPDIR}/game/bin/linuxsteamrt64"
-
 # Pre Hook
 source "${STEAMAPPDIR}/pre.sh"
 
 # Start Server
 
 echo "Starting MotorTown Dedicated Server - ${SERVER_HOSTNAME}"
-eval bash ${STEAMCMDDIR}/steamcmd.sh" "${STEAMCMD_SPEW}" +app_run "${STEAMAPPID}"
+eval bash "${STEAMCMDDIR}/steamcmd.sh" "${STEAMCMD_SPEW}" +app_run "${STEAMAPPID}"
 
 # Post Hook
 source "${STEAMAPPDIR}/post.sh"
